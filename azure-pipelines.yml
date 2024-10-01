@@ -1,0 +1,28 @@
+# azure-pipelines.yml
+trigger:
+  - main  # Triggers the pipeline when code is pushed to the 'main' branch
+
+pool:
+  vmImage: 'ubuntu-latest'  # Specifies the build agent (Ubuntu VM)
+
+steps:
+- task: UseDotNet@2  # Task to install .NET SDK
+  inputs:
+    packageType: 'sdk'
+    version: '6.x.x'  # Specify the version of .NET Core you're using
+    installationPath: $(Agent.ToolsDirectory)/dotnet
+
+- script: dotnet restore  # Restores dependencies
+  displayName: 'Restore dependencies'
+
+- script: dotnet build --configuration Release --no-restore  # Builds the project
+  displayName: 'Build project'
+
+- script: dotnet test --no-restore --verbosity normal  # Runs tests
+  displayName: 'Run tests'
+
+- task: PublishBuildArtifacts@1  # Publishes build artifacts
+  inputs:
+    pathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    artifactName: 'drop'
+    publishLocation: 'Container'
